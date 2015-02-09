@@ -128,7 +128,14 @@ module Que
             # we can't reach the database, don't crash the work loop.
             begin
               Que.execute "SELECT pg_advisory_unlock($1)", [job[:job_id]] if job
-            rescue
+            rescue => error
+              Que.log(
+                level: :error,
+                event: "error",
+                class: error.class,
+                message: error.message,
+                backtrace: error.backtrace,
+              )
             end
           end
         end
